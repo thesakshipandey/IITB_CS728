@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from collections import defaultdict
 from utils import read_json, damping_function, make_token_ids, get_token_ids
+from tqdm import tqdm
 
 # function to fill the co-occurence matrix...
 def filing_co_occurence_matrix(w: int, data: dict, co_occurence_matrix: dict, words_in_vocab: set[str]):
@@ -24,7 +25,7 @@ def filing_co_occurence_matrix(w: int, data: dict, co_occurence_matrix: dict, wo
                     j += 1
 
 # loading the data...
-data = read_json("updated_vocab_document_dict.json")
+data = read_json("vocab_dict.json")
 doc_ids = set()
 words_in_vocab = set()
 
@@ -41,7 +42,7 @@ n = len(words_in_vocab)
 # defining the hyperparameters...
 w_s = [5, 10, 15] # context window...
 dims = [50, 100, 200, 300] # embedding dimension...
-x_max = 100
+x_max = 200
 alpha = 0.75
 learning_rate = 0.05 # took from the paper and works well for dimension less than 300...
 eps = 1e-8 # standard...
@@ -77,7 +78,10 @@ for w in w_s:
         loss_per_epoch = []
         latency_per_epoch = []
 
-        while epochs < 50:
+
+        total_epochs = 50
+        pbar = tqdm(total=total_epochs, desc='Processing')
+        while epochs < total_epochs:
             t0 = time.time() # for the latency calculation...
             epoch_loss = 0.0 # for monitoring the epoch loss...
             for (word1, word2) in co_occurence_matrix.keys():
@@ -105,6 +109,7 @@ for w in w_s:
                     b[token_ids[word1]] -= (learning_rate/(eps + np.sqrt(grad_square_sum_b[token_ids[word1]])) * grad_wrt_b)
                     b_[token_ids[word2]] -= (learning_rate/(eps + np.sqrt(grad_square_sum_b_[token_ids[word2]])) * grad_wrt_b_)
             epochs += 1
+            pbar.update(1)
             loss_per_epoch.append(epoch_loss)
             latency_per_epoch.append(time.time() - t0)
             print(f"Epoch number {epochs} completed, Loss = {epoch_loss:.4f}, Latency = {latency_per_epoch[-1]:.2f}s")
@@ -132,4 +137,4 @@ for w in w_s:
             final_word_embeddings[token_ids[key]] = U[token_ids[key], :] + V[token_ids[key], :]
 
         # storing this in a pickle file...
-        np.save(f"/content/drive/MyDrive/cs_728/context_window_{w}_dimension_{d}_final_word_embeddings.npy", final_word_embeddings, allow_pickle=True)
+        np.save(f"./context_window_{w}_dimension_{d}_final_word_embeddings.npy", final_word_embeddings, allow_pickle=True)

@@ -17,7 +17,7 @@ vals = []   # counts
 doc_lenghts = []
 
 clubbed = False
-top_k = 100
+top_k = 200
 
 word2ind = {}
 

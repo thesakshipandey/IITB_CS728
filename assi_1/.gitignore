@@ -1,0 +1,3 @@
+*.npy
+term*
+vocab_dict.json
