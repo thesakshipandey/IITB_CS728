@@ -18,7 +18,7 @@ doc_lenghts = []
 
 
 top_k = 100
-task2 = False  # if true then task 5 otherwise task 2
+task2 = False  # if true then task 2 otherwise task 5
 
 word2ind = {}
 
